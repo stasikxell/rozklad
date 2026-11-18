@@ -26,4 +26,9 @@ const INFO = [
     zagolovok: "Економічна теорія — Директорська контрольна",
     vazhlyve: false,
   },
+{
+    koly: "28.12 – 08.01",
+    zagolovok: "Канікули",
+    vazhlyve: false,
+  },
 ];
