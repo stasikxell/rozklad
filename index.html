@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="auto" data-size="m">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Розклад</title>
+  <meta name="theme-color" content="#2f5bea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Розклад">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="icon" href="icon-192.png">
+  <script>try{if(localStorage.getItem("rozklad-auth"))document.documentElement.classList.add("authed")}catch(e){}</script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+      <header class="head">
+        <div class="bar">
+          <div class="brand-wrap">
+            <span class="brand" id="brand">Розклад</span>
+            <span class="brand-sub" id="brand-sub"></span>
+          </div>
+          <div class="tools">
+            <button id="info-btn" class="info-btn" type="button" aria-label="Інформація">
+              <span class="icon-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+                </svg>
+              </span>
+              <span class="cap">Інформація</span>
+            </button>
+            <button id="gear" class="icon-btn" aria-label="Налаштування" aria-haspopup="dialog">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>
+              </svg>
+            </button>
+            <button id="avatar" class="avatar" aria-label="Профіль" aria-haspopup="dialog">
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="24" cy="24" r="24" class="av-bg"/>
+                <circle cx="24" cy="18" r="8" class="av-fg"/>
+                <path d="M8 42c1.5-9 8-13 16-13s14.5 4 16 13a24 24 0 0 1-32 0z" class="av-fg"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="top">
+          <button id="prev" aria-label="Попередній тиждень">‹</button>
+          <div class="title">
+            <h1 id="range"></h1>
+            <button id="today" hidden>Повернутись до сьогодні</button>
+          </div>
+          <button id="next" aria-label="Наступний тиждень">›</button>
+        </div>
+      </header>
+
+      <main id="week"></main>
+    </div>
+
+    <!-- Профіль -->
+    <div id="profile" class="overlay" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="p-pib">
+        <svg viewBox="0 0 48 48" class="big-av" aria-hidden="true">
+          <circle cx="24" cy="24" r="24" class="av-bg"/>
+          <circle cx="24" cy="18" r="8" class="av-fg"/>
+          <path d="M8 42c1.5-9 8-13 16-13s14.5 4 16 13a24 24 0 0 1-32 0z" class="av-fg"/>
+        </svg>
+        <h2 id="p-pib"></h2>
+        <p id="p-rol"></p>
+        <a id="p-mail"></a>
+        <button id="logout" class="ghost">Вийти</button>
+        <button class="close">Закрити</button>
+      </div>
+    </div>
+
+    <!-- Налаштування -->
+    <div id="settings" class="overlay" hidden>
+      <div class="sheet left" role="dialog" aria-modal="true" aria-labelledby="s-title">
+        <h2 id="s-title">Налаштування</h2>
+
+        <div class="field">
+          <div class="lbl">Тема</div>
+          <div class="seg" data-key="theme">
+            <button type="button" data-v="auto">Авто</button>
+            <button type="button" data-v="light">Світла</button>
+            <button type="button" data-v="dark">Темна</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Розмір тексту</div>
+          <div class="seg" data-key="size">
+            <button type="button" data-v="s">Менший</button>
+            <button type="button" data-v="m">Звичайний</button>
+            <button type="button" data-v="l">Більший</button>
+          </div>
+        </div>
+
+        <label class="row">
+          <span class="lbl">Показувати аудиторії</span>
+          <input type="checkbox" class="switch" data-key="aud">
+        </label>
+        <label class="row">
+          <span class="lbl">У вихідні показувати наступний тиждень</span>
+          <input type="checkbox" class="switch" data-key="weekendNext">
+        </label>
+        <label class="row only-wide">
+          <span class="lbl">Рамка телефона на комп'ютері</span>
+          <input type="checkbox" class="switch" data-key="frame">
+        </label>
+
+        <button id="s-reset" class="ghost">Скинути налаштування</button>
+        <button class="close">Готово</button>
+      </div>
+    </div>
+
+    <!-- Інформація (виїжджає збоку) -->
+    <aside id="info" class="panel" aria-label="Інформація" aria-hidden="true" inert>
+      <div class="panel-in">
+        <header class="panel-head">
+          <button id="info-back" class="icon-btn" type="button" aria-label="Назад до розкладу">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <h1>Інформація</h1>
+        </header>
+        <div class="now">
+          <div>
+            <div class="now-day" id="info-day">—</div>
+            <div class="now-date" id="info-date">—</div>
+          </div>
+          <div class="now-time" id="info-time">—</div>
+        </div>
+        <section class="posts" id="info-list"></section>
+      </div>
+    </aside>
+
+    <!-- Вхід -->
+    <div id="gate" class="gate">
+      <div class="gate-box">
+        <div id="gate-title" class="gate-title">Mamas Hab</div>
+        <svg class="lion" viewBox="0 0 200 208" role="img" aria-label="Лев">
+      <g class="mane">
+        <circle cx="166.0" cy="104.0" r="26"/>
+        <circle cx="157.2" cy="137.0" r="26"/>
+        <circle cx="133.0" cy="161.2" r="26"/>
+        <circle cx="100.0" cy="170.0" r="26"/>
+        <circle cx="67.0" cy="161.2" r="26"/>
+        <circle cx="42.8" cy="137.0" r="26"/>
+        <circle cx="34.0" cy="104.0" r="26"/>
+        <circle cx="42.8" cy="71.0" r="26"/>
+        <circle cx="67.0" cy="46.8" r="26"/>
+        <circle cx="100.0" cy="38.0" r="26"/>
+        <circle cx="133.0" cy="46.8" r="26"/>
+        <circle cx="157.2" cy="71.0" r="26"/>
+      </g>
+      <circle class="mane-in" cx="100" cy="104" r="68"/>
+      <circle class="ear" cx="62" cy="44" r="14"/><circle class="ear-in" cx="62" cy="44" r="6.5"/>
+      <circle class="ear" cx="138" cy="44" r="14"/><circle class="ear-in" cx="138" cy="44" r="6.5"/>
+      <ellipse class="face" cx="100" cy="110" rx="45" ry="49"/>
+      <ellipse class="feat" cx="84" cy="100" rx="4.6" ry="5.6"/>
+      <ellipse class="feat" cx="116" cy="100" rx="4.6" ry="5.6"/>
+      <path class="line" d="M76 89 Q84 84 92 89 M108 89 Q116 84 124 89"/>
+      <path class="feat" d="M90 116 Q100 108 110 116 Q108 127 100 132 Q92 127 90 116Z"/>
+      <path class="line" d="M100 132 V140 M100 140 Q93 148 85 143 M100 140 Q107 148 115 143"/>
+      <circle class="dot" cx="80" cy="125" r="1.8"/><circle class="dot" cx="86" cy="128" r="1.8"/>
+      <circle class="dot" cx="120" cy="125" r="1.8"/><circle class="dot" cx="114" cy="128" r="1.8"/>
+    </svg>
+        <p class="gate-sub">Натисни, щоб відкрити розклад</p>
+        <button type="button" id="gate-enter" class="go"><span>ВХІД</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="rozklad.js"></script>
+  <script src="profil.js"></script>
+  <script src="dostup.js"></script>
+  <script src="info.js"></script>
+  <script src="settings.js"></script>
+  <script src="vhid.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
